@@ -33,6 +33,7 @@
             this.btn_Search = new System.Windows.Forms.Button();
             this.btn_ParseFile = new System.Windows.Forms.Button();
             this.txt_Output = new System.Windows.Forms.TextBox();
+            this.lbl_Output = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // txt_FilePath
@@ -47,7 +48,7 @@
             this.lb_FilePath.AutoSize = true;
             this.lb_FilePath.Location = new System.Drawing.Point(55, 49);
             this.lb_FilePath.Name = "lb_FilePath";
-            this.lb_FilePath.Size = new System.Drawing.Size(63, 17);
+            this.lb_FilePath.Size = new System.Drawing.Size(59, 16);
             this.lb_FilePath.TabIndex = 1;
             this.lb_FilePath.Text = "File Path";
             // 
@@ -80,11 +81,22 @@
             this.txt_Output.Size = new System.Drawing.Size(693, 206);
             this.txt_Output.TabIndex = 0;
             // 
+            // lbl_Output
+            // 
+            this.lbl_Output.AutoSize = true;
+            this.lbl_Output.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_Output.Location = new System.Drawing.Point(53, 150);
+            this.lbl_Output.Name = "lbl_Output";
+            this.lbl_Output.Size = new System.Drawing.Size(128, 25);
+            this.lbl_Output.TabIndex = 4;
+            this.lbl_Output.Text = "XML Output";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(917, 450);
+            this.Controls.Add(this.lbl_Output);
             this.Controls.Add(this.btn_ParseFile);
             this.Controls.Add(this.btn_Search);
             this.Controls.Add(this.lb_FilePath);
@@ -104,6 +116,7 @@
         private System.Windows.Forms.Button btn_Search;
         private System.Windows.Forms.Button btn_ParseFile;
         private System.Windows.Forms.TextBox txt_Output;
+        private System.Windows.Forms.Label lbl_Output;
     }
 }
 
