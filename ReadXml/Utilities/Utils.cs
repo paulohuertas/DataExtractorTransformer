@@ -17,7 +17,6 @@ namespace ReadXml.Utilities
             if (xmlDocument != null)
             {
                 string directory = ConfigurationManager.AppSettings.Get("directory");
-                //string directory = "C:\\01. Paulo Huertas\\c#\\Expeditors\\";
                 string docFile = xmlDocument.SelectSingleNode("//DataUpdater//CodeList//Code//ReferenceCode").InnerText;
                 string fileName = directory + docFile + ".xml";
                 xmlDocument.Save(fileName);
