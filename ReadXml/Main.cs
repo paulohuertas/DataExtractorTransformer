@@ -17,9 +17,9 @@ using ReadXml.Model;
 
 namespace ReadXml
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -81,6 +81,7 @@ namespace ReadXml
                         for (int j = 0; j < nodeCollection.Count; j++)
                         {
                             var child = nodeCollection[j].ChildNodes;
+                            
                             foreach(XmlNode node in child)
                             {
                                 if (node.Name == "ns4:dataItem")

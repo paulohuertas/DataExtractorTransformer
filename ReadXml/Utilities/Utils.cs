@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static ReadXml.Form1;
+using static ReadXml.MainForm;
 using System.Xml;
 using ReadXml.Model;
 using System.Configuration;

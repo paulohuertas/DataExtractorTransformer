@@ -1,6 +1,6 @@
 ﻿namespace ReadXml
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -91,7 +91,7 @@
             this.lbl_Output.TabIndex = 4;
             this.lbl_Output.Text = "XML Output";
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -102,8 +102,8 @@
             this.Controls.Add(this.lb_FilePath);
             this.Controls.Add(this.txt_Output);
             this.Controls.Add(this.txt_FilePath);
-            this.Name = "Form1";
-            this.Text = " m,";
+            this.Name = "MainForm";
+            this.Text = " Main";
             this.ResumeLayout(false);
             this.PerformLayout();
 
