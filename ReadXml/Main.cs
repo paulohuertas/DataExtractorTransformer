@@ -14,6 +14,7 @@ using System.Xml;
 using System.Xml.Linq;
 using ReadXml.Utilities;
 using ReadXml.Model;
+using System.Diagnostics;
 
 namespace ReadXml
 {
@@ -141,10 +142,10 @@ namespace ReadXml
                         txt_Output.Text += doc.OuterXml;
                         try
                         {
-
                             Utils.SaveFile(doc);
                             string docFile = doc.SelectSingleNode("//DataUpdater//CodeList//Code//ReferenceCode").InnerText;
-                            MessageBox.Show($"Saved successfully: {docFile.ToUpper()}");
+                            MessageBox.Show($"Saved successfully: {docFile.ToUpper()}", "Saved", MessageBoxButtons.OK);
+                            
                         }
                         catch (Exception)
                         {
