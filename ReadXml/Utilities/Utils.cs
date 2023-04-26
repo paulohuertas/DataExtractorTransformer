@@ -10,7 +10,7 @@ using System.Configuration;
 
 namespace ReadXml.Utilities
 {
-    public class Utils
+    internal class Utils
     {
         public static void SaveFile(XmlDocument xmlDocument)
         {
@@ -115,6 +115,77 @@ namespace ReadXml.Utilities
             {
                 throw new Exception("Failed to load Updater Element");
             }
+        }
+        public static List<DataUpdater> CustomsOfficeCodeListType(XmlNodeList xmlDocumentList, string codeListName, XmlNamespaceManager namespaceManager)
+        {
+            if (String.IsNullOrEmpty(codeListName))
+            {
+                throw new ArgumentException("Codelist name cannot be null");
+            }
+
+            if (xmlDocumentList == null)
+            {
+                throw new ArgumentException("Xml Document is null or invalid");
+            }
+
+            string codeCode = String.Empty;
+            string codeValue = String.Empty;
+            string codeDescription = String.Empty;
+
+            List<DataUpdater> dataUpdaters = new List<DataUpdater>();
+
+            for (int i = 0; i < xmlDocumentList.Count; i++)
+            {
+                var dataItems = xmlDocumentList[i].SelectNodes("//ns2:RDEntity//ns3:RDEntry/ns4:dataItem", namespaceManager);
+
+                var currentNodeGroup = xmlDocumentList[i];
+
+                if (currentNodeGroup.SelectSingleNode("child::ns4:dataGroup/child::ns4:dataItem", namespaceManager).InnerText == "EN")
+                {
+                    var xmlNodeLang = currentNodeGroup.SelectSingleNode("child::ns4:dataGroup/child::ns4:dataItem", namespaceManager);
+                    if (xmlNodeLang.Attributes[0].Value == "LanguageCode" && xmlNodeLang.InnerText == "EN")
+                    {
+                        codeValue = xmlNodeLang.InnerText;
+                        if (xmlNodeLang.NextSibling != null)
+                        {
+                            codeDescription = xmlNodeLang.NextSibling.InnerText;
+                        }
+                    }
+                }
+                else
+                {
+                    var xmlNodeLang = currentNodeGroup.SelectSingleNode("child::ns4:dataGroup/child::ns4:dataItem", namespaceManager);
+                    if (xmlNodeLang.Attributes[0].Value == "LanguageCode" && xmlNodeLang.InnerText != "EN")
+                    {
+                        codeValue = xmlNodeLang.InnerText;
+                        if (xmlNodeLang.NextSibling != null)
+                        {
+                            codeDescription = xmlNodeLang.NextSibling.InnerText;
+                        }
+                    }
+
+                }
+
+                if (dataItems != null && dataItems.Count > 0)
+                {
+                    codeCode = dataItems[i].InnerText;
+                }
+                else
+                {
+                    foreach (XmlNode node in dataItems)
+                    {
+                        if (node.Attributes[0].InnerText == "ReferenceNumber")
+                        {
+                            codeCode = node.InnerText;
+                        }
+                    }
+                }
+
+                DataUpdater dataUpdater = new DataUpdater(codeListName, codeCode, codeValue, codeDescription);
+
+                dataUpdaters.Add(dataUpdater);
+            }
+            return dataUpdaters;
         }
     }
 }

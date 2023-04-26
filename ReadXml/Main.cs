@@ -1,20 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Configuration;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using System.Xml;
-using System.Xml.Linq;
 using ReadXml.Utilities;
 using ReadXml.Model;
-using System.Diagnostics;
 
 namespace ReadXml
 {
@@ -46,9 +35,9 @@ namespace ReadXml
                 XmlNamespaceManager xmlNamespace = new XmlNamespaceManager(xml.NameTable);
 
                 var att = xml.DocumentElement.Attributes;
-                if(att.Count > 0)
+                if (att.Count > 0)
                 {
-                    for(int i = 0; i < att.Count; i++)
+                    for (int i = 0; i < att.Count; i++)
                     {
                         string prefix = att[i].Name.Substring(att[i].Name.IndexOf(":") + 1);
                         string uri = att[i].Value;
@@ -57,7 +46,7 @@ namespace ReadXml
                         {
                             xmlNamespace.AddNamespace(prefix, uri);
                         }
-                    } 
+                    }
                 }
                 List<DataUpdater> dataUpdaterList = new List<DataUpdater>();
 
@@ -75,55 +64,92 @@ namespace ReadXml
 
                         if (!String.IsNullOrEmpty(parentNodeList[i].Attributes[0].InnerText))
                         {
-                            codeListName = parentNodeList[i].Attributes[0].InnerText;
+                            codeListName = parentNodeList[i].Attributes[0].InnerText + "_BEAES";
                         }
 
                         var nodeCollection = parentNodeList[i].ChildNodes;
-                        for (int j = 0; j < nodeCollection.Count; j++)
+
+                        if (!codeListName.StartsWith("CustomsOffice"))
                         {
-                            var child = nodeCollection[j].ChildNodes;
-                            
-                            foreach(XmlNode node in child)
+
+                            for (int j = 0; j < nodeCollection.Count; j++)
                             {
-                                if (node.Name == "ns4:dataItem")
-                                {
-                                    codeCode = node.InnerText;
-                                    codeValue = node.InnerText;
+                                var children = nodeCollection[j].ChildNodes;
 
-                                } 
-                                else if(node.Name == "ns4:LsdList")
+                                foreach (XmlNode node in children)
                                 {
-                                    if(node.ChildNodes.Count > 0)
+                                    if (node.Name == "ns4:dataItem")
                                     {
-                                        var descriptionChildNodes = node.ChildNodes;
-
-                                        foreach(XmlNode nodeDesc in descriptionChildNodes)
+                                        if (node.NextSibling == null)
                                         {
-                                            if (nodeDesc.Attributes["lang"].Value == "en")
+                                            codeCode = node.InnerText;
+                                            codeValue = node.InnerText;
+                                        }
+                                        else if (node.NextSibling.Name != "ns4:dataItem" && node.PreviousSibling.Name != "ns4:dataItem")
+                                        {
+                                            codeCode = node.InnerText;
+                                            codeValue = node.InnerText;
+                                        }
+                                        else if (node.Attributes[0].InnerText == "CountryCode" || node.Attributes[0].InnerText.Contains("Currency") || node.Attributes[0].InnerText.Contains("RateValue"))
+                                        {
+                                            string attributeName = node.Attributes[0].InnerText;
+
+                                            switch (attributeName)
                                             {
-                                                codeDescription = nodeDesc.InnerText;
+                                                case "Currency":
+                                                    codeCode = node.InnerText;
+                                                    codeValue = node.InnerText;
+                                                    break;
+                                                case "RateValue":
+                                                    codeValue = node.InnerText;
+                                                    break;
+                                                case "CountryCode":
+                                                    codeCode = node.InnerText;
+                                                    codeValue = node.InnerText;
+                                                    break;
+                                                default:
+                                                    break;
                                             }
                                         }
                                     }
-                                    
-                                }
-                                else
-                                {
-                                    codeDescription = codeCode.ToUpper().Trim();
-                                }
-                            }
+                                    else if (node.Name == "ns4:LsdList")
+                                    {
+                                        if (node.ChildNodes.Count > 0)
+                                        {
+                                            var descriptionChildNodes = node.ChildNodes;
 
-                            if(codeValue != String.Empty && codeDescription != String.Empty)
-                            {
-                                DataUpdater dataUpdater = new DataUpdater(codeListName, codeCode, codeValue, codeDescription);
-                                if (dataUpdater != null)
+                                            foreach (XmlNode nodeDesc in descriptionChildNodes)
+                                            {
+                                                if (nodeDesc.Attributes["lang"].Value == "en")
+                                                {
+                                                    codeDescription = nodeDesc.InnerText;
+                                                }
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        codeDescription = codeCode.ToUpper().Trim();
+                                    }
+                                }
+
+                                if (codeValue != String.Empty && codeDescription != String.Empty)
                                 {
-                                    dataUpdaterList.Add(dataUpdater);
+                                    DataUpdater dataUpdater = new DataUpdater(codeListName, codeCode, codeValue, codeDescription);
+                                    if (dataUpdater != null)
+                                    {
+                                        dataUpdaterList.Add(dataUpdater);
+                                    }
                                 }
                             }
                         }
+                        else
+                        {
+                            dataUpdaterList = Utils.CustomsOfficeCodeListType(nodeCollection, codeListName, xmlNamespace);
+                        }
 
-                        string codeListDescription = codeListName + "_AES";
+                        string codeListDescription = codeListName;
 
                         var doc = Utils.CreateXmlTemplate(codeListName, codeListDescription);
 
@@ -137,6 +163,8 @@ namespace ReadXml
                         dataUpdaterList.Clear();
                     }
 
+                    int numberFiles = 0;
+
                     foreach (XmlDocument doc in docsToSave)
                     {
                         txt_Output.Text += doc.OuterXml;
@@ -144,19 +172,30 @@ namespace ReadXml
                         {
                             Utils.SaveFile(doc);
                             string docFile = doc.SelectSingleNode("//DataUpdater//CodeList//Code//ReferenceCode").InnerText;
-                            MessageBox.Show($"Saved successfully: {docFile.ToUpper()}", "Saved", MessageBoxButtons.OK);
-                            
+                            numberFiles++;
+                            if (numberFiles == 45)
+                                //MessageBox.Show($"Saved successfully: {docFile.ToUpper()}", "Saved", MessageBoxButtons.OK);
+                                MessageBox.Show("Files saving successfully. Click OK to continue", "Info", MessageBoxButtons.OK);
+
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             string docFile = doc.SelectSingleNode("//DataUpdater//CodeList//Code//ReferenceCode").InnerText;
-                            throw new Exception($"Unable to save file: {docFile.ToUpper()}");
+                            throw new Exception($"Unable to save file: {docFile.ToUpper()}", ex);
                         }
                     }
 
-                    this.Close();
+                    if (numberFiles <= 1)
+                        this.lbl_Output.Text = $"{numberFiles} file has been converted";
+                    else
+                        this.lbl_Output.Text = $"{numberFiles} files have been converted";
+
+                    MessageBox.Show("Files saved successfully!", "Info", MessageBoxButtons.OK);
                 }
             }
+
+            this.txt_FilePath.Text = String.Empty;
+            this.Show();
         }
     }
 }
