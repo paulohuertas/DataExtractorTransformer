@@ -16,8 +16,18 @@ namespace ReadXml.Utilities
         {
             if (xmlDocument != null)
             {
-                string directory = ConfigurationManager.AppSettings.Get("directory");
-                string docFile = xmlDocument.SelectSingleNode("//DataUpdater//CodeList//Code//ReferenceCode").InnerText;
+                string title = xmlDocument.SelectSingleNode("//DataUpdater//CodeList//Code//ReferenceCode").InnerText;
+                string directory = String.Empty;
+                if (title.Contains("NCTS"))
+                {
+                    directory = ConfigurationManager.AppSettings.Get("NCTS");
+                }
+                else
+                {
+                    directory = ConfigurationManager.AppSettings.Get("directory");
+                }
+
+                string docFile = title;
                 string fileName = directory + docFile + ".xml";
                 xmlDocument.Save(fileName);
             }

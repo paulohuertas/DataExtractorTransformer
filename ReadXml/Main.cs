@@ -52,9 +52,38 @@ namespace ReadXml
 
                 var parentNodeList = xml.SelectNodes("//ns0:RDEntityList//ns2:RDEntity", xmlNamespace);
 
+                XmlNode requestInformation = xml.SelectSingleNode("/ns8:ExtractValidReferenceDataRespMsg/ns0:MessageHeader/ns1:RequestInformation", xmlNamespace);
+
+                XmlNamespaceManager validReferenceNamespace = new XmlNamespaceManager(xml.NameTable);
+
+                if(requestInformation != null)
+                {
+                    XmlNode referenceData = requestInformation.ChildNodes[0];
+
+                    if(referenceData != null)
+                    {
+                        var attributes = referenceData.Attributes;
+
+                        for(int i = 0; i < attributes.Count; i++)
+                        {
+                            string prefix = attributes[i].Name.Substring(attributes[i].Name.IndexOf(":") + 1);
+                            string uri = attributes[i].Value;
+
+                            if (prefix.StartsWith("ns"))
+                            {
+                                validReferenceNamespace.AddNamespace(prefix, uri);
+                            }
+                        }
+                    }
+                }
+
+                string codeListVersion = xml.SelectSingleNode("//ns5:Extract//ns6:ExportingEntities//ns8:RDView", validReferenceNamespace).Attributes[0].Value;
+                codeListVersion = String.Concat("_", codeListVersion);
+
                 if (parentNodeList.Count > 0)
                 {
                     List<XmlDocument> docsToSave = new List<XmlDocument>();
+
                     for (int i = 0; i < parentNodeList.Count; i++)
                     {
                         string codeListName = String.Empty;
@@ -64,7 +93,7 @@ namespace ReadXml
 
                         if (!String.IsNullOrEmpty(parentNodeList[i].Attributes[0].InnerText))
                         {
-                            codeListName = parentNodeList[i].Attributes[0].InnerText + "_BEAES";
+                            codeListName = parentNodeList[i].Attributes[0].InnerText + codeListVersion;
                         }
 
                         var nodeCollection = parentNodeList[i].ChildNodes;
