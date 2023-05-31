@@ -4,18 +4,33 @@ using System.Windows.Forms;
 using System.Xml;
 using ReadXml.Utilities;
 using ReadXml.Model;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ReadXml
 {
     public partial class MainForm : Form
     {
+        string[] jurisdiction = new string[]
+        {
+            "BE", "DE", "GB", "IE", "NL"
+        };
+
         public MainForm()
         {
             InitializeComponent();
+            if(jurisdiction_cb != null)
+                jurisdiction_cb.Items.AddRange(jurisdiction);
+                jurisdiction_cb.SelectedIndex = 0;
         }
 
         private void btn_Search_Click(object sender, EventArgs e)
         {
+            if (!String.IsNullOrEmpty(txt_Output.Text))
+            {
+                txt_Output.Text = String.Empty;
+            }
+
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
             if(DialogResult.OK == openFileDialog.ShowDialog())
@@ -78,8 +93,23 @@ namespace ReadXml
                 }
 
                 string codeListVersion = xml.SelectSingleNode("//ns5:Extract//ns6:ExportingEntities//ns8:RDView", validReferenceNamespace).Attributes[0].Value;
-                codeListVersion = String.Concat("_", codeListVersion);
 
+                if (codeListVersion.Contains("NCTS"))
+                {
+                    if(jurisdiction_cb.Text.Length > 0)
+                    {
+                        codeListVersion = String.Concat("_", jurisdiction_cb.Text, "NCTS");
+                    }
+                    else
+                    {
+                        codeListVersion = String.Concat("_", "NCTS");
+                    }
+                }
+                else
+                {
+                    codeListVersion = String.Concat("_", codeListVersion);
+                }
+                
                 if (parentNodeList.Count > 0)
                 {
                     List<XmlDocument> docsToSave = new List<XmlDocument>();
@@ -119,7 +149,7 @@ namespace ReadXml
                                             codeCode = node.InnerText;
                                             codeValue = node.InnerText;
                                         }
-                                        else if (node.Attributes[0].InnerText == "CountryCode" || node.Attributes[0].InnerText.Contains("Currency") || node.Attributes[0].InnerText.Contains("RateValue"))
+                                        else if (node.Attributes[0].InnerText == "CountryCode" || node.Attributes[0].InnerText.Contains("Currency") || node.Attributes[0].InnerText.Contains("RateValue") || node.Attributes[0].InnerText == "Country")
                                         {
                                             string attributeName = node.Attributes[0].InnerText;
 
@@ -133,6 +163,10 @@ namespace ReadXml
                                                     codeValue = node.InnerText;
                                                     break;
                                                 case "CountryCode":
+                                                    codeCode = node.InnerText;
+                                                    codeValue = node.InnerText;
+                                                    break;
+                                                case "Country":
                                                     codeCode = node.InnerText;
                                                     codeValue = node.InnerText;
                                                     break;
@@ -225,6 +259,7 @@ namespace ReadXml
 
             this.txt_FilePath.Text = String.Empty;
             this.Show();
+
         }
     }
 }
