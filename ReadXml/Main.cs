@@ -227,13 +227,14 @@ namespace ReadXml
                     }
 
                     int numberFiles = 0;
+                    string fileSavedPath = String.Empty;
 
                     foreach (XmlDocument doc in docsToSave)
                     {
                         txt_Output.Text += doc.OuterXml;
                         try
                         {
-                            Utils.SaveFile(doc);
+                            fileSavedPath = Utils.SaveFile(doc);
                             string docFile = doc.SelectSingleNode("//DataUpdater//CodeList//Code//ReferenceCode").InnerText;
                             numberFiles++;
                             if (numberFiles == 45)
@@ -253,7 +254,7 @@ namespace ReadXml
                     else
                         this.lbl_Output.Text = $"{numberFiles} files have been converted";
 
-                    MessageBox.Show("Files saved successfully!", "Info", MessageBoxButtons.OK);
+                    MessageBox.Show($"Files saved successfully at {fileSavedPath}", "Info", MessageBoxButtons.OK);
                 }
             }
 

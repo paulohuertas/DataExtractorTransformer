@@ -7,12 +7,13 @@ using static ReadXml.MainForm;
 using System.Xml;
 using ReadXml.Model;
 using System.Configuration;
+using System.IO;
 
 namespace ReadXml.Utilities
 {
     internal class Utils
     {
-        public static void SaveFile(XmlDocument xmlDocument)
+        public static string SaveFile(XmlDocument xmlDocument)
         {
             if (xmlDocument != null)
             {
@@ -21,16 +22,26 @@ namespace ReadXml.Utilities
                 if (title.Contains("NCTS"))
                 {
                     directory = ConfigurationManager.AppSettings.Get("NCTS");
+                    if (!Directory.Exists(directory))
+                    {
+                        directory = Directory.GetCurrentDirectory();
+                    }
                 }
                 else
                 {
                     directory = ConfigurationManager.AppSettings.Get("directory");
+                    if (!Directory.Exists(directory))
+                    {
+                        directory = Directory.GetCurrentDirectory();
+                    }
                 }
 
                 string docFile = title;
                 string fileName = directory + docFile + ".xml";
                 xmlDocument.Save(fileName);
+                return fileName;
             }
+            return null;
         }
 
         public static XmlDocument CreateXmlTemplate(string referenceCode, string descriptionCode)
