@@ -37,7 +37,7 @@ namespace ReadXml.Utilities
                 }
 
                 string docFile = title;
-                string fileName = directory + docFile + ".xml";
+                string fileName = directory + "\\" + docFile + ".xml";
                 xmlDocument.Save(fileName);
                 return fileName;
             }
